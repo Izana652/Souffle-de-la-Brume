@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Souffle de la Brume</title>
+    
+    <link rel="icon" type="image/jpeg" href="https://i.imgur.com/yI5KxE2.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;700;900&family=Montserrat:wght@200;300;400;600&family=Cormorant+Garamond:ital,wght=1,500;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --mist-primary: #a3c9c9;
+            --mist-accent: #688f8f;
+            --mist-glow: rgba(163, 201, 201, 0.4);
+            --dark-fog: #1a1f21;
+            --bg-base: #2c3539;
+            --glass: rgba(255, 255, 255, 0.03);
+            --transition-smooth: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        html { scroll-behavior: smooth; }
+        * { cursor: default; box-sizing: border-box; }
+
+        body {
+            color: #e0e6e9;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+            margin: 0;
+            background-color: var(--bg-base);
+            overflow-x: hidden;
+            letter-spacing: 0.8px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- BACKGROUND & PARTICLES --- */
+        #mist-particles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .vignette {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.4) 100%);
+            z-index: 2; pointer-events: none;
+        }
+
+        /* --- AUDIO PLAYER --- */
+        .audio-player {
+            position: fixed; bottom: 40px; left: 40px;
+            z-index: 2000;
+            display: flex; align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 25px;
+            border-radius: 4px;
+            border: 1px solid var(--mist-accent);
+            backdrop-filter: blur(15px);
+            transition: var(--transition-smooth);
+        }
+
+        .play-btn {
+            cursor: pointer; width: 30px;
+            color: var(--mist-primary);
+            font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s ease;
+        }
+        .play-btn:hover { transform: scale(1.1); }
+
+        .track-info {
+            margin: 0 20px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: var(--mist-primary);
+        }
+
+        #volume-slider {
+            width: 0; opacity: 0;
+            transition: 0.4s ease;
+            cursor: pointer;
+            accent-color: var(--mist-primary);
+        }
+
+        .audio-player:hover #volume-slider { width: 80px; opacity: 1; }
+
+        /* --- NAVBAR & DROPDOWNS --- */
+        header {
+            position: fixed; width: 100%; padding: 20px 60px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1000; transition: var(--transition-smooth);
+        }
+
+        .logo-top { 
+            height: 60px; 
+            width: 60px;
+            object-fit: cover;
+            filter: grayscale(0.3) drop-shadow(0 0 10px var(--mist-glow));
+            transition: var(--transition-smooth);
+            border-radius: 50%;
+        }
+        .logo-top:hover { filter: grayscale(0) drop-shadow(0 0 15px var(--mist-primary)); transform: rotate(5deg) scale(1.05); }
+
+        nav ul { display: flex; list-style: none; gap: 40px; margin: 0; align-items: center; }
+        nav ul li { position: relative; }
+
+        nav ul li a { 
+            text-decoration: none; 
+            color: rgba(255,255,255,0.6); 
+            font-family: 'Cinzel', serif; 
+            font-size: 0.75rem; 
+            transition: 0.3s;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 5px;
+            letter-spacing: 2px;
+            cursor: pointer;
+        }
+        nav ul li a:hover { color: var(--mist-primary); border-bottom: 1px solid var(--mist-primary); }
+
+        .dropdown-menu {
+            position: absolute; top: 100%; left: 0;
+            background: rgba(10, 15, 17, 0.95);
+            border: 1px solid var(--mist-accent);
+            min-width: 265px; padding: 15px 0;
+            display: none; flex-direction: column;
+            backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-top: 10px; border-radius: 2px;
+        }
+        .dropdown-menu a {
+            padding: 12px 25px; border: none !important;
+            font-size: 0.7rem; color: #fff;
+            text-align: left;
+        }
+        .dropdown-menu a:hover { background: rgba(163, 201, 201, 0.1); color: var(--mist-primary); }
+        nav li:hover .dropdown-menu { display: flex; }
+
+        /* --- HERO SECTION --- */
+        .hero { 
+            position: relative; z-index: 3; height: 100vh; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center;
+        }
+
+        .mist-title { 
+            font-family: 'Cinzel Decorative', serif; 
+            font-weight: 700;
+            font-size: clamp(2rem, 6.5vw, 4.2rem); 
+            color: #fff;
+            margin: 0;
+            letter-spacing: 3px;
+            text-shadow: 0 0 35px var(--mist-glow);
+        }
+
+        /* --- CARDS GRID --- */
+        .main-section { position: relative; z-index: 3; padding: 100px 10%; }
+
+        .lore-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 30px; 
+        }
+
+        .clickable-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(163, 201, 201, 0.1);
+            padding: 45px 25px;
+            text-decoration: none; color: inherit;
+            transition: var(--transition-smooth);
+            border-radius: 4px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .clickable-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--mist-primary);
+            background: rgba(163, 201, 201, 0.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .logo-spell-grid { 
+            width: 100px; height: 100px; 
+            border-radius: 50%; 
+            margin-bottom: 25px; 
+            border: 1px solid var(--mist-accent);
+            padding: 5px;
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+            object-fit: cover;
+        }
+        .clickable-card:hover .logo-spell-grid { transform: rotate(360deg); }
+
+        .clickable-card h3 { font-family: 'Cinzel', serif; font-size: 1.15rem; letter-spacing: 1.5px; color: #fff; margin: 10px 0; z-index: 2; }
+        .clickable-card p { font-family: 'Montserrat', sans-serif; font-weight: 200; font-size: 0.85rem; color: #b0c4c4; margin: 0; line-height: 1.5; z-index: 2; }
+
+        /* --- EXPANSION MODALS --- */
+        .details-section { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(10, 15, 17, 0.97); z-index: 3000;
+            display: flex; align-items: flex-start; justify-content: center; 
+            overflow-y: scroll; 
+            opacity: 0; 
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            padding: 60px 20px;
+            will-change: opacity;
+        }
+        
+        .details-section:target { 
+            opacity: 1; 
+            visibility: visible;
+            pointer-events: auto; 
+        }
+
+        .content-box {
+            width: 100%;
+            max-width: 850px; 
+            background: rgba(255, 255, 255, 0.02);
+            padding: 60px 50px; 
+            border: 1px solid var(--mist-accent);
+            position: relative;
+            backdrop-filter: blur(25px);
+            box-shadow: 0 0 80px rgba(0,0,0,0.6);
+            transform: scale(0.96); 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: auto;
+            will-change: transform;
+        }
+        
+        .details-section:target .content-box { 
+            transform: scale(1); 
+        }
+
+        .deco-corner { position: absolute; width: 60px; opacity: 0.3; pointer-events: none; }
+        .deco-tl { top: 20px; left: 20px; }
+        .deco-tr { top: 20px; right: 20px; transform: rotate(90deg); }
+
+        .logo-inner { 
+            width: 110px; display: block; margin: 0 auto 30px; 
+            filter: drop-shadow(0 0 20px var(--mist-primary)); 
+            border-radius: 50%;
+            height: 110px;
+            object-fit: cover;
+        }
+
+        .lore-text {
+            text-align: center;
+        }
+
+        .lore-text p {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.2rem; 
+            line-height: 1.8; 
+            color: #d1d9e0; 
+            margin-bottom: 25px;
+            text-align: justify;
+        }
+
+        .code-poem-box {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.25rem;
+            line-height: 2;
+            color: #e0e6e9;
+            margin: 30px auto;
+            padding: 30px;
+            max-width: 650px;
+            border-top: 1px dashed rgba(163, 201, 201, 0.2);
+            border-bottom: 1px dashed rgba(163, 201, 201, 0.2);
+            text-align: center;
+            letter-spacing: 1px;
+            white-space: pre-line;
+        }
+
+        .lore-text ul {
+            list-style: none;
+            padding: 0;
+            margin: 40px auto;
+            max-width: 750px;
+            text-align: left;
+        }
+
+        .lore-text ul li {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: italic;
+            font-size: 1.25rem;
+            line-height: 1.7;
+            color: #e0e6e9;
+            margin-bottom: 18px;
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .lore-text ul li::before {
+            content: "✦";
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--mist-primary);
+            font-size: 0.9rem;
+            text-shadow: 0 0 8px var(--mist-primary);
+        }
+
+        /* --- CHOICE HUB CONTAINERS --- */
+        .choice-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .choice-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 30px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(163, 201, 201, 0.15);
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            transition: var(--transition-smooth);
+            border-radius: 2px;
+        }
+
+        .choice-btn:hover {
+            background: rgba(163, 201, 201, 0.08);
+            border-color: var(--mist-primary);
+            transform: translateX(15px);
+            box-shadow: -5px 5px 20px rgba(163, 201, 201, 0.1);
+        }
+
+        .choice-btn i { color: var(--mist-primary); font-size: 0.9rem; transition: 0.3s; }
+
+        .btn-close {
+            display: inline-block; padding: 13px 35px; margin-top: 40px;
+            border: 1px solid var(--mist-primary);
+            color: var(--mist-primary); text-decoration: none;
+            font-family: 'Cinzel', serif; font-size: 0.8rem; letter-spacing: 2px;
+            transition: 0.3s ease;
+            cursor: pointer;
+        }
+        .btn-close:hover { background: var(--mist-primary); color: #1a1f21; }
+
+        /* --- ACCORDIONS --- */
+        .phase-accordion {
+            margin-top: 40px;
+            text-align: left;
+            border-top: 1px solid rgba(163, 201, 201, 0.1);
+        }
+
+        .phase-item {
+            border-bottom: 1px solid rgba(163, 201, 201, 0.1);
+            transition: var(--transition-smooth);
+        }
+
+        .phase-item summary {
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 35px 10px;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        .phase-item summary::-webkit-details-marker { display: none; }
+        .phase-item summary:hover { background: rgba(255, 255, 255, 0.01); }
+
+        .phase-title-container { text-align: center; width: 100%; }
+        .phase-name { display: block; font-family: 'Cinzel', serif; font-size: 1.05rem; color: #ffffff; letter-spacing: 1px; margin-bottom: 5px; }
+        .phase-duration { display: block; font-family: 'Montserrat', sans-serif; font-size: 0.85rem; font-weight: 300; color: #7a8b94; }
+        .phase-chevron { color: rgba(163, 201, 201, 0.4); font-size: 0.9rem; transition: transform 0.4s ease; }
+
+        .phase-item[open] .phase-chevron { transform: rotate(180deg); color: var(--mist-primary); }
+
+        .phase-content {
+            padding: 25px 20px 40px 20px;
+            background: rgba(0, 0, 0, 0.15);
+            border-top: 1px dashed rgba(163, 201, 201, 0.1);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .phase-content strong {
+            color: #fff;
+        }
+
+        /* --- RECENSEMENT STYLES --- */
+        .recensement-section h3 {
+            font-family: 'Cinzel', serif;
+            color: var(--mist-primary);
+            letter-spacing: 2px;
+            margin-top: 30px;
+            border-bottom: 1px solid rgba(163, 201, 201, 0.2);
+            padding-bottom: 5px;
+        }
+        .recensement-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed rgba(163, 201, 201, 0.2);
+            padding: 25px;
+            font-family: 'Montserrat', sans-serif;
+            text-align: left;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            color: #b0c4c4;
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 20px; }
+            .main-section { padding: 60px 5%; }
+            .content-box { padding: 40px 20px; }
+            .details-section { padding: 40px 10px; }
+            .lore-text p { font-size: 1.1rem; line-height: 1.7; text-align: left; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="mist-particles"></canvas>
+    <div class="vignette"></div>
+
+    <audio id="bg-audio" loop>
+        <source src="https://mp3tourl.com/audio/1778994878339-f91bf9d2-84f0-4634-a9eb-1a4f7c292368.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="audio-player">
+        <div class="play-btn" id="music-toggle">
+            <i class="fas fa-play" id="play-icon"></i>
+        </div>
+        <div class="track-info">CELLAR - I</div>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5">
+    </div>
+
+    <header id="navbar">
+        <img src="https://i.imgur.com/vaorPVs.png" alt="Logo" class="logo-top">
+        <nav>
+            <ul>
+                <li><a href="#home">MANUSCRIT</a></li>
+                <li>
+                    <a href="#choice-guide">GUIDE & FORMATION <i class="fas fa-chevron-down" style="font-size: 0.6rem; margin-left: 5px;"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="#details-philosophie">Philosophie du Souffle</a>
+                        <a href="#details-concentration">Souffle de concentration intégrale</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="#choice-discipline">RÈGLES & DISCIPLINE <i class="fas fa-chevron-down" style="font-size: 0.6rem; margin-left: 5px;"></i></a>
+                    <div class="dropdown-menu">
+                        <a href="#details-lois">Devise & Lois</a>
+                        <a href="#details-ceremonie">Cérémonies & Titres</a>
+                    </div>
+                </li>
+                <li><a href="#lore">ARCHIVES</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <h1 class="mist-title" data-aos="zoom-in">Le Souffle de la Brume</h1>
+    </section>
+
+    <section id="lore" class="main-section">
+        <div class="lore-grid">
+            <a href="#details-histoire" class="clickable-card" data-aos="fade-up">
+                <img src="https://imgur.com/lLsDfk0.png" class="logo-spell-grid" alt="Notre Histoire">
+                <h3>Notre Histoire</h3>
+                <p>La transition séculaire des manieurs du sabre, du souffle du Vent vers la Brume.</p>
+            </a>
+
+            <a href="#choice-guide" class="clickable-card" data-aos="fade-up" data-aos-delay="100">
+                <img src="https://i.imgur.com/tTXjIza.png" class="logo-spell-grid" alt="Guide & Formation">
+                <h3>Guide & Formation</h3>
+                <p>La philosophie spirituelle et l'entraînement à la concentration intégrale.</p>
+            </a>
+
+            <a href="#details-origine" class="clickable-card" data-aos="fade-up" data-aos-delay="200">
+                <img src="https://i.imgur.com/jhX0LIp.png" class="logo-spell-grid" alt="Origine & Force">
+                <h3>Origine & Force</h3>
+                <p>Découvrez l'origine de ce souffle et ses trois grandes forces fondamentales.</p>
+            </a>
+
+            <a href="#details-definition" class="clickable-card" data-aos="fade-up" data-aos-delay="300">
+                <img src="https://i.imgur.com/yI5KxE2.png" class="logo-spell-grid" alt="Définition & Code">
+                <h3>Définition & Code</h3>
+                <p>Assimilez l'attitude requise en mission et les préceptes sacrés du code.</p>
+            </a>
+
+            <a href="#choice-discipline" class="clickable-card" data-aos="fade-up" data-aos-delay="400">
+                <img src="https://i.imgur.com/vaorPVs.png" class="logo-spell-grid" alt="Règles & Discipline">
+                <h3>Règles & Discipline</h3>
+                <p>Consultez la charte comportementale, les sanctions, grades et titres honorifiques.</p>
+            </a>
+
+            <a href="#details-mouvements" class="clickable-card" data-aos="fade-up" data-aos-delay="500">
+                <img src="https://imgur.com/oR3eSxm.png" class="logo-spell-grid" alt="Mouvements du Souffle">
+                <h3>Mouvements du Souffle</h3>
+                <p>Maîtrisez les sept formes canoniques et les deux mouvements ultimes.</p>
+            </a>
+
+            <a href="#details-organigramme" class="clickable-card" data-aos="fade-up" data-aos-delay="600">
+                <img src="https://imgur.com/TIkCw1d.png" class="logo-spell-grid" alt="Organigramme & Recensement">
+                <h3>Organigramme & Recensement</h3>
+                <p>Consultez la lignée des Piliers ainsi que l'effectif actuel du Souffle de la Brume.</p>
+            </a>
+        </div>
+    </section>
+
+    <section id="details-histoire" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <img src="https://i.imgur.com/1oexLe5.png" class="logo-inner">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; margin-bottom: 40px; letter-spacing: 3px;">NOTRE HISTOIRE</h2>
+            <div class="lore-text">
+                <p>Jusqu’en l’an 1762, le clan Iesada portait le souffle du vent dans ses veines. Depuis des générations, chaque membre de cette noble lignée maîtrisait avec fierté le souffle du Vent, symbole de grâce, de vitesse, et de liberté. On disait que leurs lames dansaient comme les bourrasques et frappaient comme les tempêtes.</p>
+                <p>Mais tout changea avec la naissance de Yabe Iesada.</p>
+                <p>À quinze ans à peine, Yabe tenta, comme tous les siens avant lui, de faire sien l’art ancestral du clan. Pourtant, malgré des mois d’efforts, il ne parvenait pas à en maîtriser les formes. Le vent lui échappait, insaisissable, comme s’il refusait de répondre à son appel.</p>
+                <p>Rapidement, les murmures se firent rumeurs, et les rumeurs moqueries. Même sa propre famille, aveuglée par la honte, se détourna de lui. Isolé, rejeté, le jeune pourfendeur n’avait plus qu’un seul espoir : comprendre pourquoi le vent ne voulait pas de lui.</p>
+                <p>Il partit alors à la rencontre d’un ancien Pilier du Vent, un maître oublié, retiré loin dans les montagnes, là où les bourrasques hurlent sans fin. Pendant des semaines, Yabe l’écouta, apprit, observa, et surtout… comprit.</p>
+                <p>Le problème ne venait pas de lui. Il ne s’agissait pas d’un manque de volonté ou de force. C’était son souffle qui était différent.</p>
+                <p>C’est ainsi que débuta un entraînement infernal, rythmé par la solitude et l’acharnement. Cinq longues années passèrent. Cinq années durant lesquelles il forgea un souffle à son image : flou, insaisissable, dérivé du Vent mais chargé de mystère… le souffle de la Brume.</p>
+                <p>Lorsqu’il revint, il n’était plus le jeune garçon moqué. Il était devenu maître d’un nouvel art, unique. Mais le prix de sa renaissance fut lourd : durant son absence, ses frères et sœurs tombèrent un à un au combat, emportés by les démons. Aucun ne survécut.</p>
+                <p>Face à l’extinction imminente de sa lignée, Yabe fit le serment de ne pas laisser disparaître le nom des Iesada. Il honora les ancêtres non pas en suivant leur voie, mais en assurant leur héritage. Il forma élèves, transmit ses techniques, et donna naissance à une nouvelle génération.</p>
+                <p>Quinze ans plus tard, le souffle du Vent s’éteignit définitivement au sein du clan. Tous ceux qui l’avaient autrefois maîtrisé avaient péri. Mais la brume, elle, persistait.</p>
+                <p>Depuis ce jour, et jusqu’à encore aujourd’hui, le clan Iesada ne vit plus dans le vent, mais dans la Brume. Un souffle né du rejet, grandi dans l’oubli, et devenu le cœur battant d’un clan nouveau...</p>
+                
+                <p style="text-align: center; font-weight: 600; color: #ff7675; margin-top: 30px; font-family: 'Cinzel', serif;">**Des pages semblent avoir été arrachées**</p>
+            </div>
+            <div style="text-align: center; margin-top: 40px;"><a href="#lore" class="btn-close">REVENIR</a></div>
+        </div>
+    </section>
+
+    <section id="choice-guide" class="details-section">
+        <div class="content-box" style="max-width: 650px;">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; letter-spacing: 5px; margin-bottom: 10px;">GUIDE & FORMATION</h2>
+            <div class="choice-container">
+                <a href="#details-philosophie" class="choice-btn"><span>Philosophie du Souffle</span><i class="fas fa-chevron-right"></i></a>
+                <a href="#details-concentration" class="choice-btn"><span>Souffle de concentration intégrale</span><i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div style="text-align: center;"><a href="#lore" class="btn-close">REVENIR AUX ARCHIVES</a></div>
+        </div>
+    </section>
+
+    <section id="details-philosophie" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; margin-bottom: 40px; letter-spacing: 3px;">PHILOSOPHIE DU SOUFFLE</h2>
+            <div class="lore-text">
+                <ul>
+                    <li>Un membre de notre souffle n'abandonne jamais peu importe la situation et ne connaît pas l'échec.</li>
+                    <li>Il se doit de tout donner afin de parvenir à son objectif même si cela le guide jusqu'à sa propre mort.</li>
+                    <li>Il doit maîtriser l'art de la tromperie et l'art de la discrétion afin d'être le plus efficace, mais aussi d'être capable de s'adapté malgré une mission difficile.</li>
+                    <li>Il ne doit pas hésiter ni retourner sur ses décisions, il doit être sûr de lui et avoir confiance en ses propres choix et ne doit pas se laisser influencer par autrui.</li>
+                    <li>Il doit prendre le temps d'analyser toutes situations pour ne commettre aucune erreur qui pourrait lui faire échouer sa mission.</li>
+                    <li>Il se doit de contrôler toutes émotions et de ne pas en laisser une seule paraître.</li>
+                    <li>Un membre de notre souffle continuera à pourfendre les démons jusqu'à leurs exterminations totales.</li>
+                </ul>
+                <p style="margin-top: 40px;">La philosophie du Souffle de la Brume repose sur une discipline rigoureuse, une détermination sans faille et un engagement total. Un membre de ce souffle ne connaît ni l’abandon ni l’échec : peu importe les obstacles, il avance, prêt à sacrifier sa vie pour accomplir sa mission. Il est formé à la discrétion et à la tromperie, deux arts qu’il manie avec finesse pour surprendre l’ennemi et s’adapter à toute situation, même les plus imprévisibles. Ses décisions sont fermes, mûries et assumées : il ne revient jamais sur ses choix et refuse de se laisser influencer. Chaque action est précédée d’une analyse minutieuse, car une seule erreur pourrait compromettre sa mission. Il garde ses émotions sous contrôle total, ne laissant rien transparaître, car la moindre faiblesse peut devenir une faille. Son devoir est clair : pourfendre les démons sans relâche, jusqu’à leur extermination complète.</p>
+            </div>
+            <div style="text-align: center;"><a href="#choice-guide" class="btn-close">RETOUR</a></div>
+        </div>
+    </section>
+
+    <section id="details-concentration" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; margin-bottom: 30px; letter-spacing: 2px;">SOUFFLE DE CONCENTRATION INTÉGRALE</h2>
+            <div class="lore-text">
+                <div class="phase-accordion">
+                    <details class="phase-item" open>
+                        <summary><div class="phase-title-container"><span class="phase-name">Phase 1 : Préparation</span><span class="phase-duration">( Mois 1 à Mois 2 )</span></div><i class="fas fa-chevron-down phase-chevron"></i></summary>
+                        <div class="phase-content">
+                            <p><strong>Jour 1 : Méditation initiale</strong><br>Commencez chaque matin par une méditation du Souffle de Concentration d'une heure pour éveiller votre conscience à l'énergie interne.</p>
+                            <p><strong>Jour 2 : Respiration consciente</strong><br>Pratiquez la respiration consciente tout au long de la journée. Prenez des respirations profondes, en vous concentrant sur le souffle entrant et sortant de votre corps.</p>
+                        </div>
+                    </details>
+                    
+                    <details class="phase-item">
+                        <summary><div class="phase-title-container"><span class="phase-name">Phase 2 : Renforcement de la Fondation</span><span class="phase-duration">( Mois 3 à Mois 5 )</span></div><i class="fas fa-chevron-down phase-chevron"></i></summary>
+                        <div class="phase-content">
+                            <p><strong>Jour 3 : Entraînement physique</strong><br>Consacrez une journée à des exercices physiques pour renforcer votre corps. La puissance physique est essentielle pour soutenir un Souffle de Concentration puissant.</p>
+                            <p><strong>Jour 4 : Méditation avancée</strong><br>Allongez votre méditation matinale à deux heures. Concentrez-vous sur la circulation de l'énergie à travers votre corps.</p>
+                            <p><strong>Jour 5 : Respiration contrôlée</strong><br>Pratiquez la respiration contrôlée, en ralentissant et en prolongeant vos inhalations et exhalations. Cela renforce votre capacité à diriger votre souffle.</p>
+                        </div>
+                    </details>
+                    
+                    <details class="phase-item">
+                        <summary><div class="phase-title-container"><span class="phase-name">Phase 3 : Éveil de l'Énergie</span><span class="phase-duration">( Mois 6 à Mois 8 )</span></div><i class="fas fa-chevron-down phase-chevron"></i></summary>
+                        <div class="phase-content">
+                            <p><strong>Jour 6 : Entraînement mental</strong><br>Pratiquez la concentration en vous focalisant sur un objet, un son ou une sensation pendant une heure. Cela développe votre capacité à maintenir une attention intense.</p>
+                            <p><strong>Jour 7 : Méditation profonde</strong><br>Plongez dans une méditation profonde de trois heures pour éveiller davantage votre énergie interne. Explorez la sensation de votre Souffle de Concentration.</p>
+                            <p><strong>Jour 8 : Visualisation</strong><br>Passez la journée à visualiser votre Souffle de Concentration comme une énergie puissante et en expansion. Imaginez comment il pourrait être utilisé en combat.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary><div class="phase-title-container"><span class="phase-name">Phase 4 : Intégration</span><span class="phase-duration">( Mois 9 à Mois 12 )</span></div><i class="fas fa-chevron-down phase-chevron"></i></summary>
+                        <div class="phase-content">
+                            <p><strong>Jour 9 : Harmonisation du souffle</strong><br>Pratiquez l'harmonisation de votre Souffle de Concentration avec vos mouvements physiques. Marchez, courez ou effectuez des mouvements fluides tout en maintenant la concentration.</p>
+                            <p><strong>Jour 10 : Méditation en mouvement</strong><br>Intégrez la méditation dans vos activités quotidiennes en restant conscient de votre Souffle de Concentration pendant toute la journée.</p>
+                            <p><strong>Jour 11 : Énergie externe</strong><br>Explorez la connexion entre votre Souffle de Concentration et le monde extérieur. Méditez en plein air et ressentez comment votre énergie se fond avec la nature.</p>
+                            <p><strong>Jour 12 : Pratique du combat</strong><br>Engagez-vous dans des séances d'entraînement au combat en utilisant votre Souffle de Concentration. Développez des techniques qui intègrent cette énergie dans votre style de combat.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary><div class="phase-title-container"><span class="phase-name">Phase 5 : Maîtrise</span><span class="phase-duration">( Mois 13 à Mois 15 )</span></div><i class="fas fa-chevron-down phase-chevron"></i></summary>
+                        <div class="phase-content">
+                            <p><strong>Jour 13 : Maîtrise de l'énergie</strong><br>Passez une journée entière à explorer toutes les facettes de votre Souffle de Concentration. Expérimentez ses limites et sa puissance.</p>
+                            <p><strong>Jour 14 : Duel avec le Maître</strong><br>Affrontez un Maître du Souffle de Concentration dans un duel amical pour tester votre maîtrise. Cela vous montrera jusqu'où vous avez progressé.</p>
+                            <p><strong>Jour 15 : Conclusion</strong><br>Prenez une journée de repos pour intégrer vos apprentissages. Réfléchissez à votre voyage et à la manière dont vous utiliserez votre Souffle de Concentration à l'avenir.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;"><a href="#choice-guide" class="btn-close">RETOUR</a></div>
+        </div>
+    </section>
+
+    <section id="details-origine" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <img src="https://i.imgur.com/jhX0LIp.png" class="logo-inner">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; margin-bottom: 30px; letter-spacing: 3px;">ORIGINE & FORCE DU SOUFFLE</h2>
+            <div class="lore-text">
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem; margin-top: 20px;">Origines du Souffle</h3>
+                <p>Le Souffle de la Brume est l'un des principaux Styles de Souffle directement dérivés du souffle du vent lui même dérivés du Souffle Originel.</p>
+                <p>Le Souffle de la Brume est un style de respiration né du rejet, forgé dans la solitude et affiné dans le silence. Inspiré par l’obscurité mouvante de la brume, il imite ses propriétés trompeuses et insaisissables. Chaque technique plonge l’adversaire dans un monde d’incertitude, où le visible devient invisible, et où le vrai se confond avec le leurre. Ce souffle repose sur trois forces fondamentales : la vitesse, la tromperie, et l’adaptabilité.</p>
+                
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem; margin-top: 40px; margin-bottom: 10px;">Les 3 grandes forces du Souffle</h3>
+                <ul>
+                    <li><strong>Vitesse — 速aさ (Hayasa) :</strong> La brume ne laisse jamais le temps de comprendre. Elle est partout, puis nulle part. Dans ce souffle, la vitesse n’est pas simplement une question de rapidité physique, mais une capacité à frapper avant que l’ennemi ne réalise ce qu’il voit. Les techniques du Souffle de la Brume reposent sur des déplacements éclairs, des frappes silencieuses et des mouvements souvent imprévisibles. L’utilisateur donne l’impression d’être en plusieurs endroits à la fois, tel un mirage au cœur d’une tempête.</li>
+                    <li><strong>Tromperie — 偽り (Itsuwari) :</strong> Cœur même du style, la tromperie transforme la réalité. Dans la brume, l'œil est trompé, l’esprit doute. Chaque mouvement est pensé pour déstabiliser les perceptions : fausses frappes, déplacements imprévisibles, angles morts, feintes complexes… l’adversaire est lentement désorienté. Ce souffle crée des illusions de mouvement, comme si l’utilisateur glissait, se dupliquait ou disparaissait dans l’air. Même le son de leurs pas semble incertain.</li>
+                    <li><strong>Adaptabilité — 柔軟性 (Jūnansei) :</strong> La brume épouse tout ce qu’elle touche. Elle s’infiltre, se transforme, se plie aux circonstances. L’utilisateur du Souffle de la Brume doit faire de même : changer de stratégie à tout instant, s’ajuster au rythme du combat, tirer avantage de l’environnement, de la lumière, du terrain ou des émotions de l’adversaire. Ce style récompense ceux qui savent observer, anticiper, et agir sans être prévisibles. Il n’y a pas de chemin fixe : la brume invente sa voie au fur et à mesure.</li>
+                </ul>
+            </div>
+            <div style="text-align: center; margin-top: 40px;"><a href="#lore" class="btn-close">REVENIR</a></div>
+        </div>
+    </section>
+
+    <section id="details-definition" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="logo-inner">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; margin-bottom: 30px; letter-spacing: 3px;">DÉFINITION & CODE DU SOUFFLE</h2>
+            <div class="lore-text">
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem;">Définition du Souffle</h3>
+                <p>Tout d'abord ce code n'est pas à prendre d'un point de vue littéral, mais plutôt d'un point de vue philosophique correspondant à notre souffle.</p>
+                <p>Il décrit comment l'un de nos membres devrait agir en mission donc de manière discrète, rapide et efficace.</p>
+                <p>Un membre du souffle de la Brume est un maître des illusions pouvant tromper ses adversaires à l'aide de différentes attaques.</p>
+                <p>Il n'arrêtera pas le temps que sa mission n'est pas terminée et qu'elle se soit résulté par une réussite.</p>
+                <p>Vous pouvez vous faire votre propre définition de ce code, mais ne vous égarez pas.</p>
+
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem; margin-top: 40px;">Code du Souffle</h3>
+                <div class="code-poem-box">
+                    ''Par la discrétion, j'obtiendrai des informations,
+                    Par la tromperie, j'accomplirai ma mission,
+                    Avec efficacité, je me débarrasserai des ennemis de l'Humanité,
+                    Dans la brume, je me dissimulerai,
+                    Une illusion, je serai,
+                    Un membre du souffle de la Brume, je représenterai.
+                    Je suivrai ce code jusqu'à ce que la mort m'emporte.''
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;"><a href="#lore" class="btn-close">REVENIR</a></div>
+        </div>
+    </section>
+
+    <section id="choice-discipline" class="details-section">
+        <div class="content-box" style="max-width: 650px;">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; letter-spacing: 5px; margin-bottom: 10px;">RÈGLES & DISCIPLINE</h2>
+            <div class="choice-container">
+                <a href="#details-lois" class="choice-btn"><span>Règles & Discipline Générale</span><i class="fas fa-chevron-right"></i></a>
+                <a href="#details-ceremonie" class="choice-btn"><span>Cérémonie & Titre Honorifique</span><i class="fas fa-chevron-right"></i></a>
+            </div>
+            <div style="text-align: center;"><a href="#lore" class="btn-close">REVENIR AUX ARCHIVES</a></div>
+        </div>
+    </section>
+
+    <section id="details-lois" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <img src="https://i.imgur.com/vaorPVs.png" class="logo-inner">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; letter-spacing: 5px; margin-bottom: 30px;">RÈGLES & DISCIPLINE</h2>
+            <div class="lore-text">
+                <p>Au sein du Souffle de la Brume, discipline et respect sont essentiels pour garantir la cohésion et l’efficacité du groupe. Chaque membre doit suivre les règles avec rigueur, respecter ses camarades, et maîtriser ses pouvoirs. Le respect mutuel et l'écoute des consignes sont primordiaux, tout manquement étant sanctionné pour maintenir l’ordre et la solidarité. Ces valeurs assurent que le Souffle reste uni et prêt à affronter les menaces.</p>
+                
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.1rem; margin-top: 30px;">Notre Devise</h3>
+                <div class="code-poem-box">
+                    ''Respect de nos ancêtres et traditions''
+                    Nous sommes les héritiers d’un savoir ancien, façonné par le sang, la discipline et la loyauté.
+                    Chaque respiration que nous prenons, chaque coup porté à l’ennemi, est un hommage à ceux qui ont marché avant nous.
+                    La brume ne dévoile jamais tout, elle dissimule, elle préserve, mais elle se souvient.
+                    Ainsi sommes-nous : discrets, patients, mais empreints de mémoire.
+                    Nous honorons les pourfendeurs d'autrefois, leurs sacrifices et leur volonté, en perpétuant les rituels transmis au fil des générations.
+                    Les traditions ne sont pas des chaînes, mais des fondations.
+                    Elles guident nos pas, elles affûtent nos lames, elles gardent nos esprits droits dans l’obscurité.
+                </div>
+
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.1rem; margin-top: 30px;">Nos Règles</h3>
+                <p style="font-size: 0.95rem; color: #ff7675; font-style: italic;">Vous vous devez de respecter ce règlement à tout prix au risque de recevoir une sanction allant d'une rétrogradation jusqu'une exclusion du Souffle.</p>
+                <ul style="margin-top: 15px;">
+                    <li><strong>I —</strong> Interdiction d'enfreindre une seule règle du règlement de base des Pourfendeurs</li>
+                    <li><strong>II —</strong> Interdiction de transmettre ce document à des membres hors du souffle de la Brume</li>
+                    <li><strong>III —</strong> Un membre du souffle de la Brume se doit d'être toujours en activité lorsqu'il porte sa tenue de pourfendeur que ce soit en patrouille ou autres</li>
+                    <li><strong>IIIV —</strong> Interdiction de manquer de respect à quelconques personnes que ce soit pourfendeurs ou villageois, ne paraissez pas non plus pour une personne hautaine. Ce sont des humains tout comme vous</li>
+                    <li><strong>V —</strong> Obligation de venir en aide à ceux qui en ont besoin</li>
+                </ul>
+
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.1rem; margin-top: 40px; text-align: left;">Formation Disciplinaire</h3>
+                <p>Le repos est une position immobile du pourfendeur debout pret a executer un ordre. Vous vous mettez au repos selon lorsqu'on vous le demande, c'est normalement à la personne la plus haut gradé de donner cet ordre lorsque vous etes dans les ranges ( ex : Estrade )</p>
+                <p>Les quarts de tour et demi-turn sont des commandements dont nous faisons usage pour faire changer de front à un bataillon de pourfendeur, soit à droite soit à gauche ou par un demi-tour ( demi-tour gauche n'existe pas)</p>
+                
+                <h4 style="color: #fff; text-align: left; font-family: 'Cinzel'; font-size: 0.9rem; margin-top: 20px;">Les différentes cadences de pas :</h4>
+                <p style="text-align: left; padding-left: 15px;">• Marche<br>• Pas gymnastique qui est une allure de marche entre la marche rapide et la course<br>• Pas de course</p>
+
+                <h4 style="color: #fff; text-align: left; font-family: 'Cinzel'; font-size: 0.9rem; margin-top: 20px;">Pour se présenter :</h4>
+                <p style="text-align: left; font-style: italic; background: rgba(255,255,255,0.02); padding: 15px; border-left: 2px solid var(--mist-primary);">Nom, Grade, Souffle, Corps<br>( ex : Mes respects, Ryuu Isheda, Tsuchinoe, du Souffle de la Brume, et Stratège du CMDMLT )</p>
+
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.1rem; margin-top: 40px; text-align: left;">Blâmes & Sanctions</h3>
+                <p>Le système de blâmes repose sur une gestion collective et progressive des fautes, visant à maintenir une discipline stricte tout en responsabilisant chaque membre de plus chaque faute commise par un membre impacte l’ensemble du groupe. L’idée est de renforcer la solidarité et d’encourager chacun à veiller à la discipline collective. Si un pourfendeur échoue à suivre les règles, tous reçoivent une sanction.</p>
+                <p style="text-align: left; font-weight: 400; color: #fff;">Voici comment il fonctionne :</p>
+                <p style="text-align: left; padding-left: 15px;"><strong>1er Blâme :</strong> Avertissement - Rappel l'importance de la rigueur et du respect des règles.<br><strong>2ème Blâme :</strong> Exclusion définitive</p>
+            </div>
+            <div style="text-align: center; margin-top: 30px;"><a href="#choice-discipline" class="btn-close">RETOUR</a></div>
+        </div>
+    </section>
+
+    <section id="details-ceremonie" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; letter-spacing: 4px; margin-bottom: 30px;">CÉRÉMONIE & TITRE HONORIFIQUE</h2>
+            <div class="lore-text">
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem; text-align: left;">Les Cérémonies</h3>
+                <p>Le Souffle de la Brume, considéré comme un souffle d'élite, peut organiser des cérémonies selon l’appréciation des hauts dignitaires. Ces rassemblements auront pour objectif de dresser un bilan collectif et individuel des membres. Ils permettront également l’attribution de missions et d’autres décisions nécessaires. À l’issue de ces cérémonies, des promotions ou, le cas échéant, des rétrogradations peuvent être soumises.</p>
+
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem; text-align: left; margin-top: 40px;">Condition de montée en rang</h3>
+                <p style="text-align: left;">
+                    <strong>Mizunoto à Mizunoe :</strong><br>2 rapports construits sur votre activité et votre compréhension de l’ordre.<br><br>
+                    <strong>Mizunoe à Kanoto :</strong><br>3 rapports construits sur votre activité et votre compréhension de l’ordre.<br><br>
+                    <strong>Kanoto à Kanoe :</strong><br>• Avoir une vision précise du Souffle de la Brume.<br>• Comprendre la philosophie d'un pourfendeur.<br>• Connaitre les caractéristique du Souffle de la Brume<br>• Début d’un investissement visible dans l’ordre (intégration à une faction, projet, etc.)<br>• 5 rapports construits/journaliers<br><br>
+                    <strong>Kanoe à Tsuchinoto :</strong><br>• Obligation d’être dans un Corps de l'Ordre.<br>• Développement d’un projet personnel (mouvement, poison, tactique, etc.)<br>• Reconnaissance par vos pairs pour vos actions et votre comportement.<br>• Avoir sa propres vision de l'Ordre.<br>• 5 rapports construits/journaliers ou entraînements encadrés.<br><br>
+                    <strong>Tsuchinoto à Tsuchinoe :</strong><br>• Connaitre l'histoire de notre souffle.<br>• Avoir un objectif à accomplir.<br>• Preuve d’un investissement constant dans l’ordre<br>• Projet personnel avancé et suivi<br>• Mérite démontré<br>• 5 rapports construits/journaliers ou entraînements encadrés
+                </p>
+                
+                <h4 style="font-family: 'Cinzel'; color: #fff; text-align: left; margin-top: 30px;">Annotations :</h4>
+                <p style="background: rgba(163,201,201,0.03); padding: 20px; border-left: 2px solid var(--mist-accent);">Bien qu'il s'agisse de prérequis quant à la manière d'évoluer au sein de l'Ordre, c'est bien l'efficacité et la capacité du pourfendeur à œuvrer pour le bien de l'Humanité qui est mis en lumière. Ainsi, un pourfendeur investi et utile peut outrepasser certains de ces prérequis, sous-entendant une question de mérite qui prime sur tout ce qui puisse être réalisé.</p>
+
+                <h3 style="font-family: 'Cinzel'; color: var(--mist-primary); font-size: 1.15rem; text-align: left; margin-top: 40px;">Titres Spéciaux</h3>
+                <p style="text-align: left;"><strong>Faucheur Silencieux :</strong><br>Le titre de Faucheur Silencieux est décerné à un membre du Souffle de la Brume maître de la furtivité, capable d'accomplir ses missions sans être détecté. Que ce soit pour éliminer des démons, récolter des informations ou récupérer des objets, il utilise la brume pour dissimuler sa présence et frapper avec une précision mortelle. Ce titre symbolise un combattant qui agit dans l'ombre, accomplissant ses tâches avec une discrétion totale et une efficacité implacable.</p>
+                <p style="text-align: left; margin-top: 20px;"><strong>Le Seigneur des Brumes :</strong><br>Le titre de Seigneur des Brumes serait attribué à un membre ayant non seulement maîtrisé le Souffle de la Brume, mais aussi approfondi sa compréhension théorique en étudiant ses principes, ses applications et ses implications. Ce titre honore un spécialiste ayant survécu à de nombreuses situations périlleuses, affrontant seul des ennemis redoutables (sous RPK), et ayant révolutionné l'art du Souffle par ses innovations et ses contributions exceptionnelles.</p>
+            </div>
+            <div style="text-align: center; margin-top: 30px;"><a href="#choice-discipline" class="btn-close">RETOUR</a></div>
+        </div>
+    </section>
+
+    <section id="details-mouvements" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <img src="https://imgur.com/oR3eSxm.png" class="logo-inner">
+            
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; letter-spacing: 5px; margin-bottom: 20px;">MOUVEMENTS DU SOUFFLE</h2>
+            
+            <div class="lore-text">
+                <p>Le Souffle de la Brume, comme tous les Souffles, est composé de plusieurs mouvements.</p>
+                
+                <div class="phase-accordion">
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Premier Mouvement : Brume suspendue dans le ciel</span><span class="phase-duration">Ichi no Kata : Suiten Togasumi</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>Permet à l'utilisateur de faire un unique coup de sabre frontal très rapide.</p>
+                            <p style="font-style: italic; color: var(--mist-primary);">Ce mouvement est bien sûr le premier à être enseigné aux aspirants qui auront réussi leur examen passant alors Mizunoto.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Deuxième Mouvement : Voile de Brume</span><span class="phase-duration">Ni No Kata : Yaekasumi</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>L'utilisateur produit un nuage de poussière en mettant beaucoup de coups de katana à une grande vitesse le rendant presque impossible à voir.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Troisième Mouvement : Océan de Brouillard</span><span class="phase-duration">San no Kata : Kasan no Shibuki</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>Permet à l'utilisateur de se déplacer très rapidement afin de surprendre son adversaire.</p>
+                            <p>Il permet à son utilisateur de se déplacer d'une manière instantanée permettant la fuite ou les attaques surprise.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Quatrième Mouvement : Brouillard au clair de lune</span><span class="phase-duration">Shi no Kata : Tsuki no Kashô</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>L'utilisateur saute haut dans les airs et envoie une série d'innombrables coups à distance vers le bas.</p>
+                            <p>Ce mouvement est utilisé afin d'achever un démon rendu faible par un combat de plus celui-ci fait un grand nombre de dégâts sur les démons au plus bas rangs.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Cinquième Mouvement : Frappe d'Advection</span><span class="phase-duration">Go no Kata : Iryûkiri</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>L'utilisateur libère une frappe unique sous la forme d'une brume qui s'espace. Permet à l'utilisateur de faire un coup horizontal très rapide.</p>
+                            <p>Non seulement cette technique permet d'esquiver les attaques ennemies, mais elle inflige également d'importants dégâts à plusieurs adversaires en même temps.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Sixième Mouvement : Éclaboussure de Brume</span><span class="phase-duration">Roku no kata : Kasan no Shibuki</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>Une série de puissantes attaques à distance lancées autour de l’utilisateur. L'utilisateur tourne sur lui-même permettant de produire un mouvement rapide tout en infligeant des dégâts à son adversaire.</p>
+                            <p style="color: #ff7675; font-weight: 400;">Il est déconseillé aux novices n'ayant que très peu de contrôle sur leur souffle d'utiliser ce mouvement, vous risquez de plus vous blesser que votre adversaire.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Septième Mouvement : Sacrifice de la Brume</span><span class="phase-duration">Shichi no Kata : Kiri no gisei</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>C'est un mouvement très puissant qui permet à l'utilisateur de sacrifier une partie de son espérance de vie pour être en mesure de réutiliser un mouvement ultime de manière forcée.</p>
+                            <p style="color: #ff7675;">Cependant, cette technique est très dangereuse car elle peut affaiblir considérablement l'utilisateur, voire même le tuer si elle est utilisée de manière excessive. L'utilisateur doit donc faire preuve d'une grande prudence lorsqu'il utilise cette technique.</p>
+                        </div>
+                    </details>
+
+                    <h3 style="font-family: 'Cinzel'; color: #fff; letter-spacing: 2px; margin-top: 40px; margin-bottom: 20px; text-align: center;">MOUVEMENTS ULTIMES</h3>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Premier Mouvement Ultime : Explosion Désembuante</span><span class="phase-duration">Sen no Kata : Bahuhatsu wo sho awa</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>L'utilisateur s'élance dans les airs avant d'atterrir et produire des attaques puissantes faisant repousser ses adversaires.</p>
+                            <p>Cette technique est souvent utilisée pour protéger des alliés ou pour résoudre des conflits sans violence. Elle peut créer une zone de sécurité autour de l'utilisateur, repoussant tous les ennemis sans causer de dommages physiques.</p>
+                        </div>
+                    </details>
+
+                    <details class="phase-item">
+                        <summary>
+                            <div class="phase-title-container"><span class="phase-name">Deuxième Mouvement Ultime : Condensation Brûlante</span><span class="phase-duration">Man no Kata : Nensho Gyoshuku</span></div>
+                            <i class="fas fa-chevron-down phase-chevron"></i>
+                        </summary>
+                        <div class="phase-content">
+                            <p>L'utilisateur libère un grand nuage de poussière à l'aide de coups rapides et puissants le rendant imprévisible et lui permettant d'attaquer son adversaire rapidement de tous les côtés.</p>
+                            <p>Il permet aussi bien d'esquiver les coups, que d'infliger de gros dégâts à plusieurs adversaires en même temps.</p>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;"><a href="#lore" class="btn-close">REVENIR</a></div>
+        </div>
+    </section>
+
+    <section id="details-organigramme" class="details-section">
+        <div class="content-box">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tl">
+            <img src="https://i.imgur.com/yI5KxE2.png" class="deco-corner deco-tr">
+            <img src="https://imgur.com/TIkCw1d.png" class="logo-inner">
+            
+            <h2 style="text-align: center; font-family: 'Cinzel'; color: #fff; letter-spacing: 4px; margin-bottom: 30px;">ORGANIGRAMME & RECENSEMENT</h2>
+            
+            <div class="lore-text recensement-section">
+                <h3 style="text-align: left;">Hiérarchie Historique</h3>
+                <p style="text-align: left; padding-left: 10px; margin-top: 15px;">
+                    <strong>Anciens Piliers :</strong> Hisoka Iesada, Yuta Mitsubishi, Kumori Iesada<br>
+                    <strong>Pilier Actuel :</strong> . . .<br>
+                    <strong>Tsuguko :</strong> . . .
+                </p>
+
+                <h3 style="text-align: left; margin-top: 40px;">Effectif Actuel du Souffle</h3>
+                <div class="recensement-box">Effectif du Souffle de la Brume.
+ㅤ
+ Dirigeante du Souffle.
+- Sayana Furukawa
+Gérant du Souffle.
+- Akaezan Iesada
+- Zelios Iesada
+ Co-Gérant du Souffle.
+- Zetsu Renjiro
+
+Pilier. - (1/1)
+- Sayana Furukawa
+
+ Kinoe. - (0/1)
+
+Kinoto. - (1/1)
+- Akæzañ Iesada
+
+ Hinoe. - (0/1)
+
+ Hinoto. - (2/2)
+- Zelios Iesada
+- Zetsu Renjiro
+
+ Tsuchinoe. - (0/3)
+ Tsuchinoto. - (0/4)
+
+ Kanoe. - (1/∞)
+- Azuu.
+
+ Kanoto. - (1/∞)
+- Tsugumi Gisei
+
+ Mizunoe. - (1/∞)
+- Asmita Aylïmea
+
+ Mizunoto. - (2/∞)
+- Shinkiri Komachi
+- Kuroha
+
+Instructeur. - (0/∞)
+
+- Dernière mise-à-jour : 22/04
+- Effectif Total : 9/9</div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;"><a href="#lore" class="btn-close">REVENIR</a></div>
+        </div>
+    </section>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 1000, once: true });
+
+        // Particles System
+        const canvas = document.getElementById('mist-particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 80 + 40;
+                this.speedX = Math.random() * 0.3 - 0.15;
+                this.speedY = Math.random() * 0.2 - 0.1;
+                this.opacity = Math.random() * 0.15 + 0.05;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < -this.size || this.x > canvas.width + this.size || this.y < -this.size || this.y > canvas.height + this.size) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                let gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.size);
+                gradient.addColorStop(0, `rgba(163, 201, 201, ${this.opacity})`);
+                gradient.addColorStop(1, 'rgba(44, 53, 57, 0)');
+                ctx.fillStyle = gradient;
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 40; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // Audio System
+        const audio = document.getElementById('bg-audio');
+        const toggle = document.getElementById('music-toggle');
+        const icon = document.getElementById('play-icon');
+        const slider = document.getElementById('volume-slider');
+
+        audio.volume = slider.value;
+
+        toggle.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                icon.className = 'fas fa-pause';
+            } else {
+                audio.pause();
+                icon.className = 'fas fa-play';
+            }
+        });
+
+        slider.addEventListener('input', (e) => {
+            audio.volume = e.target.value;
+        });
+
+        // Navbar Control on Scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(26, 31, 33, 0.9)';
+                nav.style.padding = '15px 60px';
+            } else {
+                nav.style.background = 'transparent';
+                nav.style.padding = '20px 60px';
+            }
+        });
+    </script>
+</body>
+</html>
